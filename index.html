@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>🎣 Fishing Master 3D Pro Online</title>
+<title>🎣 Fishing</title>
 <style>
     body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; -webkit-user-select: none; }
     
@@ -11,6 +11,7 @@
     #main-menu {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         display: flex; flex-direction: column; justify-content: center; align-items: center;
+        /* Kunci efek blur background */
         background: rgba(0, 0, 0, 0.4); 
         backdrop-filter: blur(10px); 
         -webkit-backdrop-filter: blur(10px);
@@ -37,18 +38,12 @@
 
     .menu-card h1 { margin: 0 0 20px 0; color: #1976D2; font-size: 24px; }
     
-    .input-group {
-        width: 80%; margin: 0 auto 15px auto;
-    }
-
-    .input-field {
-        width: 100%; padding: 12px; 
+    .input-name {
+        width: 80%; padding: 12px; margin-bottom: 20px;
         border: 2px solid #ddd; border-radius: 10px;
         font-size: 16px; text-align: center; outline: none;
-        box-sizing: border-box; /* Agar padding tidak merusak width */
-        transition: border-color 0.3s;
     }
-    .input-field:focus { border-color: #2196F3; }
+    .input-name:focus { border-color: #2196F3; }
 
     .btn-start {
         background: linear-gradient(135deg, #4CAF50, #2E7D32);
@@ -56,28 +51,25 @@
         border-radius: 30px; font-size: 18px; font-weight: bold;
         cursor: pointer; box-shadow: 0 4px 10px rgba(76, 175, 80, 0.4);
         transition: transform 0.2s;
-        margin-top: 10px;
     }
     .btn-start:active { transform: scale(0.95); }
 
-    /* --- NAME TAG & ONLINE STATUS --- */
-    .player-label {
+    /* --- NAME TAG --- */
+    #player-nametag {
         position: absolute;
-        background: rgba(0, 0, 0, 0.6);
+        background: rgba(0, 0, 0, 0.5);
         color: white;
         padding: 4px 10px;
         border-radius: 12px;
         font-size: 12px;
         font-weight: bold;
-        pointer-events: none;
+        pointer-events: none; /* Agar tidak menghalangi klik */
         white-space: nowrap;
-        transform: translate(-50%, -100%);
-        display: none;
+        transform: translate(-50%, -100%); /* Center di atas kepala */
+        display: none; /* Sembunyi sebelum start */
         z-index: 50;
         text-shadow: 1px 1px 2px black;
-        border: 1px solid rgba(255,255,255,0.3);
     }
-    .is-remote { background: rgba(25, 118, 210, 0.7); }
 
     /* UI Container */
     #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: none; flex-direction: column; justify-content: space-between; }
@@ -148,12 +140,6 @@
 
     /* Helper for Desktop */
     #pc-controls { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.5); font-size: 12px; pointer-events: none; }
-    
-    #online-status {
-        position: fixed; bottom: 10px; left: 10px;
-        color: #0f0; font-size: 10px; z-index: 200;
-        text-shadow: 1px 1px 1px black;
-    }
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -161,22 +147,15 @@
 
 <div id="main-menu">
     <div class="menu-card">
-        <h1>🎣 Fishing Master Pro</h1>
-        <p style="color:#666; margin-bottom:15px;">Login Multiplayer</p>
-        
-        <div class="input-group">
-            <input type="text" id="username-input" class="input-field" placeholder="Username (Nama)" maxlength="12">
-        </div>
-        <div class="input-group">
-            <input type="password" id="password-input" class="input-field" placeholder="Password (Kunci Akun)">
-        </div>
-        
-        <small style="color:#888; display:block; margin-bottom:10px;">System P2P (Serverless Vercel)</small>
-        <button class="btn-start" id="btn-start-game">MULAI ONLINE</button>
+        <h1>🎣 Fishing</h1>
+        <p style="color:#666; margin-bottom:15px;">Masukkan nama untuk mulai memancing!</p>
+        <input type="text" id="username-input" class="input-name" placeholder="Nama Pemain" maxlength="12">
+        <br>
+        <button class="btn-start" onclick="startGame()">MULAI</button>
     </div>
 </div>
 
-<div id="labels-container"></div>
+<div id="player-nametag">Player</div>
 
 <div id="ui-layer">
     <div class="hud-top">
@@ -187,7 +166,7 @@
         </div>
         <div class="stat-box" style="align-items: flex-end;">
             <div class="stat-row"><i class="fas fa-ship"></i> <span id="boat-name">Jalan Kaki</span></div>
-            <small style="color:#aaa" id="time-disp">Peer-to-Peer Mode</small>
+            <small style="color:#aaa" id="time-disp">12:00 PM</small>
         </div>
     </div>
 
@@ -205,22 +184,20 @@
 
     <div class="hud-bottom">
         <div id="pc-controls" class="mobile-hide">WASD = Gerak | SPASI = Mancing | Klik Kanan = Kamera</div>
-        <button class="action-btn btn-orange" onclick="window.openShop()">
+        <button class="action-btn btn-orange" onclick="openShop()">
             <i class="fas fa-store"></i> Toko
         </button>
-        <button id="cast-btn" class="action-btn btn-green" onclick="window.handleCast()">
+        <button id="cast-btn" class="action-btn btn-green" onclick="handleCast()">
             <i class="fas fa-anchor"></i> LEMPAR
         </button>
     </div>
 </div>
 
-<div id="online-status">Connecting to Swarm...</div>
-
 <div id="shop-modal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
             <h3>🏪 Toko Perlengkapan</h3>
-            <button class="close-modal" onclick="window.closeShop()">✕</button>
+            <button class="close-modal" onclick="closeShop()">✕</button>
         </div>
         <div class="modal-body">
             <div class="shop-item">
@@ -228,7 +205,7 @@
                     <strong>Jual Semua Ikan</strong><br>
                     <small>Ubah hasil tangkapan jadi uang</small>
                 </div>
-                <button class="shop-btn" onclick="window.sellAllFish()">JUAL</button>
+                <button class="shop-btn" onclick="sellAllFish()">JUAL</button>
             </div>
             <hr>
             <h4>🚤 Perahu</h4>
@@ -237,14 +214,14 @@
                     <strong>Perahu Kayu</strong><br>
                     <small>Harga: 150 | Speed ++</small>
                 </div>
-                <button class="shop-btn" id="btn-boat-1" onclick="window.buyBoat(1, 150)">BELI</button>
+                <button class="shop-btn" id="btn-boat-1" onclick="buyBoat(1, 150)">BELI</button>
             </div>
             <div class="shop-item">
                 <div>
                     <strong>Speedboat</strong><br>
                     <small>Harga: 500 | Speed ++++</small>
                 </div>
-                <button class="shop-btn" id="btn-boat-2" onclick="window.buyBoat(2, 500)">BELI</button>
+                <button class="shop-btn" id="btn-boat-2" onclick="buyBoat(2, 500)">BELI</button>
             </div>
             <hr>
             <h4>🎣 Pancingan</h4>
@@ -253,7 +230,7 @@
                     <strong>Upgrade Joran</strong><br>
                     <small>Harga: <span id="rod-cost">50</span> | Chance ++</small>
                 </div>
-                <button class="shop-btn" onclick="window.upgradeRod()">UPGRADE</button>
+                <button class="shop-btn" onclick="upgradeRod()">UPGRADE</button>
             </div>
         </div>
     </div>
@@ -261,697 +238,535 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-<script type="module">
-    import { joinRoom } from 'https://esm.sh/trystero@0.19.0';
+<script>
+// --- GAME STATE & VARIABLES ---
+let gameStarted = false; // Flag to check if game is active
+let playerName = "Player";
 
-    // --- GAME STATE & VARIABLES ---
-    let gameStarted = false;
-    let playerName = "Player";
-    let playerHash = "000"; // Signature dari password
-
-    // --- MULTIPLAYER P2P VARIABLES ---
-    let room;
-    let sendMove;
-    let peers = {}; // Menyimpan data player lain: { peerId: { mesh, label, targetPos, targetRot, boatLvl } }
-    
-    // Hash function sederhana untuk "mengamankan" akun (tripcode)
-    function simpleHash(str) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-            const char = str.charCodeAt(i);
-            hash = (hash << 5) - hash + char;
-            hash = hash & hash;
-        }
-        return Math.abs(hash).toString(16).substring(0, 4);
+const CONFIG = {
+    colors: {
+        water: 0x006994,
+        skyDay: 0x87CEEB,
+        skySunset: 0xEDC9AF,
+        skyNight: 0x0f172a,
+        platform: 0x8BC34A
     }
+};
 
-    const CONFIG = {
-        colors: {
-            water: 0x006994,
-            skyDay: 0x87CEEB,
-            skySunset: 0xEDC9AF,
-            skyNight: 0x0f172a,
-            platform: 0x8BC34A
-        }
-    };
+const STATE = {
+    money: 0,
+    fishInventory: [],
+    rodLevel: 1,
+    boatLevel: 0,
+    isFishing: false,
+    fishingPhase: 'idle', 
+    biteTimer: null,
+    dayTime: 0 
+};
 
-    const STATE = {
-        money: 0,
-        fishInventory: [],
-        rodLevel: 1,
-        boatLevel: 0,
-        isFishing: false,
-        fishingPhase: 'idle', 
-        biteTimer: null
-    };
+// --- START GAME LOGIC ---
+function startGame() {
+    const input = document.getElementById('username-input');
+    if (input.value.trim() === "") {
+        alert("Mohon masukkan nama!");
+        return;
+    }
+    
+    playerName = input.value;
+    gameStarted = true;
+    
+    // Update Name Tag
+    const tag = document.getElementById('player-nametag');
+    tag.textContent = playerName;
+    tag.style.display = 'block';
 
-    // --- START GAME LOGIC ---
-    document.getElementById('btn-start-game').addEventListener('click', startGame);
+    // Hide Menu with fade out
+    const menu = document.getElementById('main-menu');
+    menu.style.opacity = '0';
+    setTimeout(() => {
+        menu.style.display = 'none';
+        document.getElementById('ui-layer').style.display = 'flex'; // Show Game UI
+    }, 500);
 
-    function startGame() {
-        const nameInput = document.getElementById('username-input');
-        const passInput = document.getElementById('password-input');
-        
-        if (nameInput.value.trim() === "" || passInput.value.trim() === "") {
-            alert("Masukkan Username DAN Password!");
+    // Reset Camera Angle for gameplay
+    camAngle = 0;
+}
+
+// --- THREE.JS SETUP ---
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(CONFIG.colors.skyDay);
+scene.fog = new THREE.FogExp2(CONFIG.colors.skyDay, 0.015);
+
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+// Start with a cinematic angle for the menu background
+camera.position.set(20, 15, 20);
+camera.lookAt(0, 0, 0);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+
+// --- LIGHTING ---
+const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
+scene.add(hemiLight);
+
+const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+dirLight.position.set(50, 100, 50);
+dirLight.castShadow = true;
+dirLight.shadow.mapSize.width = 2048;
+dirLight.shadow.mapSize.height = 2048;
+scene.add(dirLight);
+
+// --- ENVIRONMENT ---
+const waterGeometry = new THREE.PlaneGeometry(300, 300, 64, 64);
+const waterMaterial = new THREE.MeshPhongMaterial({
+    color: CONFIG.colors.water,
+    transparent: true,
+    opacity: 0.85,
+    shininess: 80,
+    flatShading: true 
+});
+const water = new THREE.Mesh(waterGeometry, waterMaterial);
+water.rotation.x = -Math.PI / 2;
+water.position.y = -0.5;
+scene.add(water);
+
+const waterPosAttribute = waterGeometry.attributes.position;
+const waterOriginalPos = [];
+for(let i = 0; i < waterPosAttribute.count; i++){
+    waterOriginalPos.push({
+        x: waterPosAttribute.getX(i),
+        y: waterPosAttribute.getY(i),
+        z: waterPosAttribute.getZ(i)
+    });
+}
+
+// Island
+const islandGroup = new THREE.Group();
+const platformMesh = new THREE.Mesh(
+    new THREE.CylinderGeometry(18, 22, 4, 8),
+    new THREE.MeshStandardMaterial({ color: 0x5D4037 }) 
+);
+platformMesh.position.y = -2;
+platformMesh.receiveShadow = true;
+islandGroup.add(platformMesh);
+
+const grassMesh = new THREE.Mesh(
+    new THREE.CylinderGeometry(18, 18, 0.5, 8),
+    new THREE.MeshStandardMaterial({ color: CONFIG.colors.platform })
+);
+grassMesh.position.y = 0;
+grassMesh.receiveShadow = true;
+islandGroup.add(grassMesh);
+
+function createTree(x, z) {
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.7, 3, 5), new THREE.MeshStandardMaterial({color:0x4e342e}));
+    trunk.position.set(x, 1.5, z);
+    trunk.castShadow = true;
+    const leaves = new THREE.Mesh(new THREE.ConeGeometry(2.5, 5, 5), new THREE.MeshStandardMaterial({color:0x2e7d32}));
+    leaves.position.set(x, 4.5, z);
+    leaves.castShadow = true;
+    islandGroup.add(trunk, leaves);
+}
+createTree(-8, -5);
+createTree(-10, 2);
+createTree(9, -6);
+scene.add(islandGroup);
+
+function checkCollision(x, z) {
+    const dist = Math.sqrt(x*x + z*z);
+    return dist < 17; 
+}
+
+// --- PLAYER & BOAT ---
+const playerGroup = new THREE.Group();
+scene.add(playerGroup);
+
+const playerBody = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 0.5), new THREE.MeshStandardMaterial({color: 0x1976D2}));
+playerBody.position.y = 0.6;
+playerBody.castShadow = true;
+const playerHead = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.6), new THREE.MeshStandardMaterial({color: 0xFFCC80}));
+playerHead.position.y = 1.5;
+playerHead.castShadow = true;
+playerGroup.add(playerBody, playerHead);
+
+const rodGroup = new THREE.Group();
+const rodStick = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.08, 3, 4), new THREE.MeshStandardMaterial({color: 0x333}));
+rodStick.rotation.x = Math.PI / 4;
+rodStick.position.set(0.3, 1.5, 0.5);
+rodGroup.add(rodStick);
+playerGroup.add(rodGroup);
+
+const bobber = new THREE.Mesh(new THREE.SphereGeometry(0.2), new THREE.MeshStandardMaterial({color: 0xFF3D00, emissive: 0xAA0000, emissiveIntensity: 0.2}));
+scene.add(bobber);
+bobber.visible = false;
+
+const lineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,0)]);
+const lineMat = new THREE.LineBasicMaterial({ color: 0xFFFFFF });
+const fishingLine = new THREE.Line(lineGeo, lineMat);
+scene.add(fishingLine);
+fishingLine.visible = false;
+
+let currentBoat = null;
+function updateBoatModel(level) {
+    if(currentBoat) scene.remove(currentBoat);
+    if(level === 0) return;
+
+    currentBoat = new THREE.Group();
+    const color = level === 1 ? 0x8D6E63 : 0xF44336;
+    const size = level === 1 ? {x:2.5, z:4.5} : {x:3, z:6};
+    
+    const hull = new THREE.Mesh(new THREE.BoxGeometry(size.x, 0.8, size.z), new THREE.MeshStandardMaterial({color: color}));
+    hull.position.y = 0.2;
+    currentBoat.add(hull);
+    
+    if(level === 2) {
+        const motor = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1, 0.8), new THREE.MeshStandardMaterial({color:0x333}));
+        motor.position.set(0, 0.5, -size.z/2);
+        currentBoat.add(motor);
+    }
+    scene.add(currentBoat);
+}
+
+// --- FISH SYSTEM ---
+const fishes = [];
+function spawnFish() {
+    const fish = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), new THREE.MeshStandardMaterial({color: Math.random() > 0.8 ? 0xFFD700 : 0x00BCD4}));
+    body.scale.set(1, 0.6, 1);
+    const tail = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.4, 4), new THREE.MeshStandardMaterial({color: 0xffffff}));
+    tail.position.z = -0.4;
+    tail.rotation.x = -Math.PI/2;
+    fish.add(body, tail);
+    
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 25 + Math.random() * 50;
+    fish.position.set(Math.cos(angle)*dist, -0.5, Math.sin(angle)*dist);
+    fish.rotation.y = Math.random() * Math.PI * 2;
+    
+    fish.userData = { speed: 0.05 + Math.random() * 0.05, turnSpeed: (Math.random() - 0.5) * 0.02, isGold: body.material.color.getHex() === 0xFFD700 };
+    scene.add(fish);
+    fishes.push(fish);
+}
+for(let i=0; i<20; i++) spawnFish();
+
+const particles = [];
+function createSplash(pos) {
+    for(let i=0; i<8; i++) {
+        const p = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({color: 0xEEFFFF}));
+        p.position.copy(pos);
+        p.position.y = 0;
+        p.userData = { vel: new THREE.Vector3((Math.random()-0.5)*0.2, 0.3 + Math.random()*0.2, (Math.random()-0.5)*0.2), life: 1.0 };
+        scene.add(p);
+        particles.push(p);
+    }
+}
+
+// --- CONTROLS ---
+const joystick = { active: false, x: 0, y: 0, originX: 0, originY: 0 };
+const keys = { w: false, a: false, s: false, d: false };
+
+const joyZone = document.getElementById('joystick-zone');
+const stick = document.getElementById('joystick-stick');
+
+joyZone.addEventListener('touchstart', (e) => {
+    if (!gameStarted) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    joystick.active = true;
+    joystick.originX = touch.clientX;
+    joystick.originY = touch.clientY;
+    stick.style.transition = 'none';
+});
+
+document.addEventListener('touchmove', (e) => {
+    if(!joystick.active || !gameStarted) return;
+    const touch = e.touches[0];
+    const dx = touch.clientX - joystick.originX;
+    const dy = touch.clientY - joystick.originY;
+    const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 60);
+    const angle = Math.atan2(dy, dx);
+    joystick.x = (Math.cos(angle) * dist) / 60;
+    joystick.y = (Math.sin(angle) * dist) / 60;
+    stick.style.transform = `translate(calc(-50% + ${Math.cos(angle)*dist}px), calc(-50% + ${Math.sin(angle)*dist}px))`;
+}, {passive: false});
+
+const endJoy = () => {
+    joystick.active = false;
+    joystick.x = 0;
+    joystick.y = 0;
+    stick.style.transition = 'transform 0.1s';
+    stick.style.transform = `translate(-50%, -50%)`;
+};
+document.addEventListener('touchend', endJoy);
+
+document.addEventListener('keydown', e => {
+    if (!gameStarted) return;
+    if(e.key === ' ') handleCast();
+    if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = true;
+});
+document.addEventListener('keyup', e => {
+    if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = false;
+});
+
+// Camera
+let camAngle = 0;
+let isDragging = false;
+let lastMouseX = 0;
+
+document.addEventListener('mousedown', e => { if(e.button===2 && gameStarted) { isDragging=true; lastMouseX=e.clientX; } });
+document.addEventListener('mousemove', e => {
+    if(isDragging && gameStarted) {
+        camAngle -= (e.clientX - lastMouseX) * 0.005;
+        lastMouseX = e.clientX;
+    }
+});
+document.addEventListener('mouseup', () => isDragging=false);
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// --- GAME LOGIC FUNCTIONS ---
+function showNotification(msg) {
+    const el = document.getElementById('notification');
+    el.textContent = msg;
+    el.style.opacity = 1;
+    setTimeout(() => el.style.opacity = 0, 2000);
+}
+
+function handleCast() {
+    if (STATE.fishingPhase === 'idle') {
+        if (STATE.boatLevel === 0 && !checkCollision(playerGroup.position.x, playerGroup.position.z)) {
+            showNotification("Tidak bisa mancing sambil berenang!");
             return;
         }
+        STATE.isFishing = true;
+        STATE.fishingPhase = 'casted';
+        document.getElementById('cast-btn').innerHTML = '<i class="fas fa-exclamation"></i> TUNGGU..';
+        document.getElementById('cast-btn').className = 'action-btn btn-orange';
         
-        playerName = nameInput.value.trim();
-        // Buat kode unik berdasarkan password
-        playerHash = simpleHash(passInput.value.trim()); 
-        
-        gameStarted = true;
-
-        // Init P2P (Trystero)
-        initMultiplayer();
-        
-        // Buat Label Sendiri
-        createPlayerLabel('local', playerName + ' #' + playerHash);
-
-        // Hide Menu
-        const menu = document.getElementById('main-menu');
-        menu.style.opacity = '0';
-        setTimeout(() => {
-            menu.style.display = 'none';
-            document.getElementById('ui-layer').style.display = 'flex'; 
-        }, 500);
-
-        camAngle = 0;
-    }
-
-    // --- P2P SYSTEM (Trystero) ---
-    function initMultiplayer() {
-        // Gabung ke room 'fishing-master-global' menggunakan config 'fishing-game-v1'
-        const config = { appId: 'fishing-master-3d-pro-v1' };
-        // Trystero akan otomatis mencari peer lain via Torrent DHT (publik)
-        room = joinRoom(config, 'global-lake-map');
-
-        // Setup Action: 'move' (kirim posisi)
-        const [sendPos, getPos] = room.makeAction('move');
-        sendMove = sendPos;
-
-        // Ketika menerima data posisi dari orang lain
-        getPos((data, peerId) => {
-            if (!peers[peerId]) {
-                spawnRemotePlayer(peerId, data);
-            } else {
-                updateRemotePlayer(peerId, data);
-            }
-        });
-
-        // Event Peer Masuk/Keluar
-        room.onPeerJoin(peerId => console.log(`${peerId} joined`));
-        room.onPeerLeave(peerId => removeRemotePlayer(peerId));
-        
-        document.getElementById('online-status').innerText = "🟢 Online (P2P Mesh Active)";
-    }
-
-    function spawnRemotePlayer(peerId, data) {
-        // Buat Mesh untuk player lain
-        const group = new THREE.Group();
-        
-        // Badan
-        const body = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 0.5), new THREE.MeshStandardMaterial({color: 0x888888})); // Abu-abu utk player lain
-        body.position.y = 0.6;
-        const head = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.6), new THREE.MeshStandardMaterial({color: 0xFFE0B2}));
-        head.position.y = 1.5;
-        group.add(body, head);
-        
-        // Perahu holder
-        const boatGroup = new THREE.Group();
-        group.add(boatGroup);
-
-        scene.add(group);
-        
-        // Buat Label HTML
-        createPlayerLabel(peerId, data.name, true);
-
-        peers[peerId] = {
-            mesh: group,
-            boatGroup: boatGroup,
-            targetPos: new THREE.Vector3(data.x, 0, data.z),
-            targetRot: data.rot,
-            currentBoat: -1
-        };
-        
-        updateRemoteBoatModel(peerId, data.boat);
-        
-        // Posisikan awal
-        group.position.set(data.x, 0, data.z);
-    }
-
-    function updateRemotePlayer(peerId, data) {
-        const p = peers[peerId];
-        // Simpan target posisi untuk interpolasi (agar gerakan halus)
-        p.targetPos.set(data.x, 0, data.z);
-        p.targetRot = data.rot;
-        
-        if (p.currentBoat !== data.boat) {
-            updateRemoteBoatModel(peerId, data.boat);
-        }
-    }
-
-    function updateRemoteBoatModel(peerId, level) {
-        const p = peers[peerId];
-        p.boatGroup.clear(); // Hapus perahu lama
-        p.currentBoat = level;
-        
-        if (level > 0) {
-            const color = level === 1 ? 0x8D6E63 : 0xF44336;
-            const size = level === 1 ? {x:2.5, z:4.5} : {x:3, z:6};
-            const hull = new THREE.Mesh(new THREE.BoxGeometry(size.x, 0.8, size.z), new THREE.MeshStandardMaterial({color: color}));
-            hull.position.y = 0.2;
-            p.boatGroup.add(hull);
-        }
-    }
-
-    function removeRemotePlayer(peerId) {
-        if (peers[peerId]) {
-            scene.remove(peers[peerId].mesh);
-            const lbl = document.getElementById('label-'+peerId);
-            if(lbl) lbl.remove();
-            delete peers[peerId];
-        }
-    }
-
-    function createPlayerLabel(id, text, isRemote = false) {
-        const div = document.createElement('div');
-        div.id = 'label-' + id;
-        div.className = 'player-label' + (isRemote ? ' is-remote' : '');
-        div.textContent = text;
-        document.getElementById('labels-container').appendChild(div);
-    }
-
-    function updateLabelsPosition() {
-        // Local
-        updateSingleLabel('local', playerGroup.position);
-        
-        // Remote
-        for (let id in peers) {
-            if (peers[id].mesh) {
-                updateSingleLabel(id, peers[id].mesh.position);
-            }
-        }
-    }
-
-    function updateSingleLabel(id, worldPos) {
-        const el = document.getElementById('label-'+id);
-        if(!el) return;
-        
-        const pos = worldPos.clone();
-        pos.y += 2.5; 
-        pos.project(camera);
-
-        const widthHalf = window.innerWidth / 2;
-        const heightHalf = window.innerHeight / 2;
-
-        const x = (pos.x * widthHalf) + widthHalf;
-        const y = -(pos.y * heightHalf) + heightHalf;
-
-        if (pos.z < 1) {
-            el.style.left = x + 'px';
-            el.style.top = y + 'px';
-            el.style.display = 'block';
-        } else {
-            el.style.display = 'none';
-        }
-    }
-
-    // --- THREE.JS SETUP ---
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(CONFIG.colors.skyDay);
-    scene.fog = new THREE.FogExp2(CONFIG.colors.skyDay, 0.015);
-
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(20, 15, 20);
-    camera.lookAt(0, 0, 0);
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    document.body.appendChild(renderer.domElement);
-
-    // --- LIGHTING ---
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
-    scene.add(hemiLight);
-
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-    dirLight.position.set(50, 100, 50);
-    dirLight.castShadow = true;
-    dirLight.shadow.mapSize.width = 2048;
-    dirLight.shadow.mapSize.height = 2048;
-    scene.add(dirLight);
-
-    // --- ENVIRONMENT ---
-    const waterGeometry = new THREE.PlaneGeometry(300, 300, 64, 64);
-    const waterMaterial = new THREE.MeshPhongMaterial({
-        color: CONFIG.colors.water,
-        transparent: true, opacity: 0.85, shininess: 80, flatShading: true 
-    });
-    const water = new THREE.Mesh(waterGeometry, waterMaterial);
-    water.rotation.x = -Math.PI / 2;
-    water.position.y = -0.5;
-    scene.add(water);
-
-    const waterPosAttribute = waterGeometry.attributes.position;
-    const waterOriginalPos = [];
-    for(let i = 0; i < waterPosAttribute.count; i++){
-        waterOriginalPos.push({
-            x: waterPosAttribute.getX(i),
-            y: waterPosAttribute.getY(i),
-            z: waterPosAttribute.getZ(i)
-        });
-    }
-
-    // Island
-    const islandGroup = new THREE.Group();
-    const platformMesh = new THREE.Mesh(
-        new THREE.CylinderGeometry(18, 22, 4, 8),
-        new THREE.MeshStandardMaterial({ color: 0x5D4037 }) 
-    );
-    platformMesh.position.y = -2;
-    platformMesh.receiveShadow = true;
-    islandGroup.add(platformMesh);
-
-    const grassMesh = new THREE.Mesh(
-        new THREE.CylinderGeometry(18, 18, 0.5, 8),
-        new THREE.MeshStandardMaterial({ color: CONFIG.colors.platform })
-    );
-    grassMesh.position.y = 0;
-    grassMesh.receiveShadow = true;
-    islandGroup.add(grassMesh);
-
-    function createTree(x, z) {
-        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.7, 3, 5), new THREE.MeshStandardMaterial({color:0x4e342e}));
-        trunk.position.set(x, 1.5, z);
-        trunk.castShadow = true;
-        const leaves = new THREE.Mesh(new THREE.ConeGeometry(2.5, 5, 5), new THREE.MeshStandardMaterial({color:0x2e7d32}));
-        leaves.position.set(x, 4.5, z);
-        leaves.castShadow = true;
-        islandGroup.add(trunk, leaves);
-    }
-    createTree(-8, -5);
-    createTree(-10, 2);
-    createTree(9, -6);
-    scene.add(islandGroup);
-
-    function checkCollision(x, z) {
-        const dist = Math.sqrt(x*x + z*z);
-        return dist < 17; 
-    }
-
-    // --- PLAYER & BOAT ---
-    const playerGroup = new THREE.Group();
-    scene.add(playerGroup);
-    // Export playerGroup to window for labels
-    window.playerGroup = playerGroup;
-
-    const playerBody = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 0.5), new THREE.MeshStandardMaterial({color: 0x1976D2}));
-    playerBody.position.y = 0.6;
-    playerBody.castShadow = true;
-    const playerHead = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.6), new THREE.MeshStandardMaterial({color: 0xFFCC80}));
-    playerHead.position.y = 1.5;
-    playerHead.castShadow = true;
-    playerGroup.add(playerBody, playerHead);
-
-    const rodGroup = new THREE.Group();
-    const rodStick = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.08, 3, 4), new THREE.MeshStandardMaterial({color: 0x333}));
-    rodStick.rotation.x = Math.PI / 4;
-    rodStick.position.set(0.3, 1.5, 0.5);
-    rodGroup.add(rodStick);
-    playerGroup.add(rodGroup);
-
-    const bobber = new THREE.Mesh(new THREE.SphereGeometry(0.2), new THREE.MeshStandardMaterial({color: 0xFF3D00, emissive: 0xAA0000, emissiveIntensity: 0.2}));
-    scene.add(bobber);
-    bobber.visible = false;
-
-    const lineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,0)]);
-    const lineMat = new THREE.LineBasicMaterial({ color: 0xFFFFFF });
-    const fishingLine = new THREE.Line(lineGeo, lineMat);
-    scene.add(fishingLine);
-    fishingLine.visible = false;
-
-    let currentBoat = null;
-    function updateBoatModel(level) {
-        if(currentBoat) scene.remove(currentBoat);
-        if(level === 0) return;
-
-        currentBoat = new THREE.Group();
-        const color = level === 1 ? 0x8D6E63 : 0xF44336;
-        const size = level === 1 ? {x:2.5, z:4.5} : {x:3, z:6};
-        
-        const hull = new THREE.Mesh(new THREE.BoxGeometry(size.x, 0.8, size.z), new THREE.MeshStandardMaterial({color: color}));
-        hull.position.y = 0.2;
-        currentBoat.add(hull);
-        
-        if(level === 2) {
-            const motor = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1, 0.8), new THREE.MeshStandardMaterial({color:0x333}));
-            motor.position.set(0, 0.5, -size.z/2);
-            currentBoat.add(motor);
-        }
-        scene.add(currentBoat);
-    }
-
-    // --- FISH SYSTEM ---
-    const fishes = [];
-    function spawnFish() {
-        const fish = new THREE.Group();
-        const body = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), new THREE.MeshStandardMaterial({color: Math.random() > 0.8 ? 0xFFD700 : 0x00BCD4}));
-        body.scale.set(1, 0.6, 1);
-        const tail = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.4, 4), new THREE.MeshStandardMaterial({color: 0xffffff}));
-        tail.position.z = -0.4;
-        tail.rotation.x = -Math.PI/2;
-        fish.add(body, tail);
-        
-        const angle = Math.random() * Math.PI * 2;
-        const dist = 25 + Math.random() * 50;
-        fish.position.set(Math.cos(angle)*dist, -0.5, Math.sin(angle)*dist);
-        fish.rotation.y = Math.random() * Math.PI * 2;
-        
-        fish.userData = { speed: 0.05 + Math.random() * 0.05, turnSpeed: (Math.random() - 0.5) * 0.02 };
-        scene.add(fish);
-        fishes.push(fish);
-    }
-    for(let i=0; i<20; i++) spawnFish();
-
-    const particles = [];
-    function createSplash(pos) {
-        for(let i=0; i<8; i++) {
-            const p = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({color: 0xEEFFFF}));
-            p.position.copy(pos);
-            p.position.y = 0;
-            p.userData = { vel: new THREE.Vector3((Math.random()-0.5)*0.2, 0.3 + Math.random()*0.2, (Math.random()-0.5)*0.2), life: 1.0 };
-            scene.add(p);
-            particles.push(p);
-        }
-    }
-
-    // --- CONTROLS ---
-    const joystick = { active: false, x: 0, y: 0, originX: 0, originY: 0 };
-    const keys = { w: false, a: false, s: false, d: false };
-
-    const joyZone = document.getElementById('joystick-zone');
-    const stick = document.getElementById('joystick-stick');
-
-    joyZone.addEventListener('touchstart', (e) => {
-        if (!gameStarted) return;
-        e.preventDefault();
-        const touch = e.touches[0];
-        joystick.active = true;
-        joystick.originX = touch.clientX;
-        joystick.originY = touch.clientY;
-        stick.style.transition = 'none';
-    });
-
-    document.addEventListener('touchmove', (e) => {
-        if(!joystick.active || !gameStarted) return;
-        const touch = e.touches[0];
-        const dx = touch.clientX - joystick.originX;
-        const dy = touch.clientY - joystick.originY;
-        const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 60);
-        const angle = Math.atan2(dy, dx);
-        joystick.x = (Math.cos(angle) * dist) / 60;
-        joystick.y = (Math.sin(angle) * dist) / 60;
-        stick.style.transform = `translate(calc(-50% + ${Math.cos(angle)*dist}px), calc(-50% + ${Math.sin(angle)*dist}px))`;
-    }, {passive: false});
-
-    const endJoy = () => {
-        joystick.active = false;
-        joystick.x = 0;
-        joystick.y = 0;
-        stick.style.transition = 'transform 0.1s';
-        stick.style.transform = `translate(-50%, -50%)`;
-    };
-    document.addEventListener('touchend', endJoy);
-
-    document.addEventListener('keydown', e => {
-        if (!gameStarted) return;
-        if(e.key === ' ') handleCast();
-        if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = true;
-    });
-    document.addEventListener('keyup', e => {
-        if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = false;
-    });
-
-    // Camera
-    let camAngle = 0;
-    let isDragging = false;
-    let lastMouseX = 0;
-
-    document.addEventListener('mousedown', e => { if(e.button===2 && gameStarted) { isDragging=true; lastMouseX=e.clientX; } });
-    document.addEventListener('mousemove', e => {
-        if(isDragging && gameStarted) {
-            camAngle -= (e.clientX - lastMouseX) * 0.005;
-            lastMouseX = e.clientX;
-        }
-    });
-    document.addEventListener('mouseup', () => isDragging=false);
-    document.addEventListener('contextmenu', e => e.preventDefault());
-
-    // --- GAME FUNCTIONS ---
-    function showNotification(msg) {
-        const el = document.getElementById('notification');
-        el.textContent = msg;
-        el.style.opacity = 1;
-        setTimeout(() => el.style.opacity = 0, 2000);
-    }
-
-    // Attach to window for HTML events
-    window.handleCast = function() {
-        if (STATE.fishingPhase === 'idle') {
-            if (STATE.boatLevel === 0 && !checkCollision(playerGroup.position.x, playerGroup.position.z)) {
-                showNotification("Tidak bisa mancing sambil berenang!");
-                return;
-            }
-            STATE.isFishing = true;
-            STATE.fishingPhase = 'casted';
-            document.getElementById('cast-btn').innerHTML = '<i class="fas fa-exclamation"></i> TUNGGU..';
-            document.getElementById('cast-btn').className = 'action-btn btn-orange';
-            
-            const dir = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), playerGroup.rotation.y);
-            const castDist = 8 + STATE.rodLevel * 2;
-            bobber.position.set(playerGroup.position.x + dir.x * castDist, 0, playerGroup.position.z + dir.z * castDist);
-            bobber.visible = true;
-            fishingLine.visible = true;
-            createSplash(bobber.position);
-
-            const waitTime = (Math.random() * 3000) + 2000;
-            setTimeout(triggerBite, waitTime);
-
-        } else if (STATE.fishingPhase === 'biting') {
-            clearTimeout(STATE.biteTimer);
-            catchFish();
-        } else if (STATE.fishingPhase === 'casted') {
-            resetFishing("Terlalu cepat!");
-        }
-    }
-
-    function triggerBite() {
-        if (STATE.fishingPhase !== 'casted') return;
-        STATE.fishingPhase = 'biting';
-        document.getElementById('cast-btn').innerHTML = '<i class="fas fa-bolt"></i> TARIK!';
-        document.getElementById('cast-btn').className = 'action-btn btn-red';
-        bobber.position.y = -0.5;
+        const dir = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), playerGroup.rotation.y);
+        const castDist = 8 + STATE.rodLevel * 2;
+        bobber.position.set(playerGroup.position.x + dir.x * castDist, 0, playerGroup.position.z + dir.z * castDist);
+        bobber.visible = true;
+        fishingLine.visible = true;
         createSplash(bobber.position);
-        STATE.biteTimer = setTimeout(() => { resetFishing("Ikan lepas!"); }, 1000);
-    }
 
-    function catchFish() {
-        const isRare = Math.random() < 0.2;
-        const value = isRare ? 50 : 10;
-        const name = isRare ? "Ikan Emas Legenda" : "Ikan Biasa";
-        STATE.fishInventory.push({name, value});
-        const alert = document.getElementById('catch-alert');
-        document.getElementById('catch-name').textContent = name;
-        document.getElementById('catch-value').textContent = value;
-        alert.style.transform = 'translate(-50%, -50%) scale(1)';
-        setTimeout(() => alert.style.transform = 'translate(-50%, -50%) scale(0)', 1500);
-        resetFishing(null);
+        const waitTime = (Math.random() * 3000) + 2000;
+        setTimeout(triggerBite, waitTime);
+
+    } else if (STATE.fishingPhase === 'biting') {
+        clearTimeout(STATE.biteTimer);
+        catchFish();
+    } else if (STATE.fishingPhase === 'casted') {
+        resetFishing("Terlalu cepat!");
+    }
+}
+
+function triggerBite() {
+    if (STATE.fishingPhase !== 'casted') return;
+    STATE.fishingPhase = 'biting';
+    document.getElementById('cast-btn').innerHTML = '<i class="fas fa-bolt"></i> TARIK!';
+    document.getElementById('cast-btn').className = 'action-btn btn-red';
+    bobber.position.y = -0.5;
+    createSplash(bobber.position);
+    STATE.biteTimer = setTimeout(() => { resetFishing("Ikan lepas!"); }, 1000);
+}
+
+function catchFish() {
+    const isRare = Math.random() < 0.2;
+    const value = isRare ? 50 : 10;
+    const name = isRare ? "Ikan Emas Legenda" : "Ikan Biasa";
+    STATE.fishInventory.push({name, value});
+    const alert = document.getElementById('catch-alert');
+    document.getElementById('catch-name').textContent = name;
+    document.getElementById('catch-value').textContent = value;
+    alert.style.transform = 'translate(-50%, -50%) scale(1)';
+    setTimeout(() => alert.style.transform = 'translate(-50%, -50%) scale(0)', 1500);
+    resetFishing(null);
+    updateHUD();
+}
+
+function resetFishing(msg) {
+    if(msg) showNotification(msg);
+    STATE.isFishing = false;
+    STATE.fishingPhase = 'idle';
+    bobber.visible = false;
+    fishingLine.visible = false;
+    document.getElementById('cast-btn').innerHTML = '<i class="fas fa-anchor"></i> LEMPAR';
+    document.getElementById('cast-btn').className = 'action-btn btn-green';
+}
+
+function updateHUD() {
+    document.getElementById('money').textContent = STATE.money;
+    document.getElementById('fish-count').textContent = STATE.fishInventory.length;
+    document.getElementById('level-disp').textContent = STATE.rodLevel;
+}
+
+function openShop() { document.getElementById('shop-modal').style.display = 'flex'; }
+function closeShop() { document.getElementById('shop-modal').style.display = 'none'; }
+function sellAllFish() {
+    if (STATE.fishInventory.length === 0) return;
+    let total = 0;
+    STATE.fishInventory.forEach(f => total += f.value);
+    STATE.money += total;
+    STATE.fishInventory = [];
+    updateHUD();
+    showNotification(`Terjual! +${total} Coin`);
+}
+function buyBoat(level, cost) {
+    if (STATE.money >= cost && STATE.boatLevel < level) {
+        STATE.money -= cost;
+        STATE.boatLevel = level;
+        updateBoatModel(level);
+        document.getElementById('boat-name').textContent = level === 1 ? "Perahu Kayu" : "Speedboat";
+        document.getElementById(`btn-boat-${level}`).disabled = true;
         updateHUD();
     }
-
-    function resetFishing(msg) {
-        if(msg) showNotification(msg);
-        STATE.isFishing = false;
-        STATE.fishingPhase = 'idle';
-        bobber.visible = false;
-        fishingLine.visible = false;
-        document.getElementById('cast-btn').innerHTML = '<i class="fas fa-anchor"></i> LEMPAR';
-        document.getElementById('cast-btn').className = 'action-btn btn-green';
-    }
-
-    function updateHUD() {
-        document.getElementById('money').textContent = STATE.money;
-        document.getElementById('fish-count').textContent = STATE.fishInventory.length;
-        document.getElementById('level-disp').textContent = STATE.rodLevel;
-    }
-
-    window.openShop = function() { document.getElementById('shop-modal').style.display = 'flex'; }
-    window.closeShop = function() { document.getElementById('shop-modal').style.display = 'none'; }
-    window.sellAllFish = function() {
-        if (STATE.fishInventory.length === 0) return;
-        let total = 0;
-        STATE.fishInventory.forEach(f => total += f.value);
-        STATE.money += total;
-        STATE.fishInventory = [];
+}
+function upgradeRod() {
+    const cost = STATE.rodLevel * 50;
+    if (STATE.money >= cost) {
+        STATE.money -= cost;
+        STATE.rodLevel++;
+        document.getElementById('rod-cost').textContent = STATE.rodLevel * 50;
         updateHUD();
-        showNotification(`Terjual! +${total} Coin`);
     }
-    window.buyBoat = function(level, cost) {
-        if (STATE.money >= cost && STATE.boatLevel < level) {
-            STATE.money -= cost;
-            STATE.boatLevel = level;
-            updateBoatModel(level);
-            document.getElementById('boat-name').textContent = level === 1 ? "Perahu Kayu" : "Speedboat";
-            document.getElementById(`btn-boat-${level}`).disabled = true;
-            updateHUD();
-        }
+}
+
+// Function to update name tag position
+function updateNameTagPosition() {
+    if(!gameStarted) return;
+    
+    const tag = document.getElementById('player-nametag');
+    
+    // Copy position and raise it above head
+    const pos = playerGroup.position.clone();
+    pos.y += 2.8; 
+
+    // Convert 3D position to 2D screen coords
+    pos.project(camera);
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const x = (pos.x * .5 + .5) * width;
+    const y = (-(pos.y * .5) + .5) * height;
+
+    // Check if behind camera
+    if (pos.z < 1) {
+        tag.style.left = x + 'px';
+        tag.style.top = y + 'px';
+        tag.style.display = 'block';
+    } else {
+        tag.style.display = 'none';
     }
-    window.upgradeRod = function() {
-        const cost = STATE.rodLevel * 50;
-        if (STATE.money >= cost) {
-            STATE.money -= cost;
-            STATE.rodLevel++;
-            document.getElementById('rod-cost').textContent = STATE.rodLevel * 50;
-            updateHUD();
-        }
+}
+
+// --- LOOP ---
+const clock = new THREE.Clock();
+
+function animate() {
+    requestAnimationFrame(animate);
+    const delta = clock.getDelta();
+    const time = clock.getElapsedTime();
+
+    // Water Anim
+    for(let i = 0; i < waterPosAttribute.count; i++){
+        const orig = waterOriginalPos[i];
+        const z = 0.5 * Math.sin(orig.x * 0.2 + time) * Math.cos(orig.y * 0.1 + time);
+        waterPosAttribute.setZ(i, orig.z + z);
+    }
+    waterPosAttribute.needsUpdate = true;
+
+    if (!gameStarted) {
+        // Main Menu Background Animation (Auto Rotate Camera)
+        camera.position.x = Math.sin(time * 0.1) * 30;
+        camera.position.z = Math.cos(time * 0.1) * 30;
+        camera.lookAt(0,0,0);
     }
 
-    // --- LOOP ---
-    const clock = new THREE.Clock();
-    let syncTimer = 0;
-
-    function animate() {
-        requestAnimationFrame(animate);
-        const delta = clock.getDelta();
-        const time = clock.getElapsedTime();
-
-        // Water Anim
-        for(let i = 0; i < waterPosAttribute.count; i++){
-            const orig = waterOriginalPos[i];
-            const z = 0.5 * Math.sin(orig.x * 0.2 + time) * Math.cos(orig.y * 0.1 + time);
-            waterPosAttribute.setZ(i, orig.z + z);
-        }
-        waterPosAttribute.needsUpdate = true;
-
-        if (!gameStarted) {
-            camera.position.x = Math.sin(time * 0.1) * 30;
-            camera.position.z = Math.cos(time * 0.1) * 30;
-            camera.lookAt(0,0,0);
+    // Player Movement only if Game Started
+    if (gameStarted && !STATE.isFishing) {
+        let mx = 0, mz = 0;
+        if (joystick.active) { mx = joystick.x; mz = joystick.y; } 
+        else {
+            if(keys.w) mz = -1;
+            if(keys.s) mz = 1;
+            if(keys.a) mx = -1;
+            if(keys.d) mx = 1;
         }
 
-        if (gameStarted && !STATE.isFishing) {
-            let mx = 0, mz = 0;
-            if (joystick.active) { mx = joystick.x; mz = joystick.y; } 
-            else {
-                if(keys.w) mz = -1;
-                if(keys.s) mz = 1;
-                if(keys.a) mx = -1;
-                if(keys.d) mx = 1;
-            }
+        if (mx !== 0 || mz !== 0) {
+            const angle = Math.atan2(mx, mz) + camAngle;
+            const speed = (STATE.boatLevel === 0) ? 5 : (STATE.boatLevel === 1 ? 10 : 18);
+            playerGroup.position.x += Math.sin(angle) * speed * delta;
+            playerGroup.position.z += Math.cos(angle) * speed * delta;
+            playerGroup.rotation.y = angle;
 
-            if (mx !== 0 || mz !== 0) {
-                const angle = Math.atan2(mx, mz) + camAngle;
-                const speed = (STATE.boatLevel === 0) ? 5 : (STATE.boatLevel === 1 ? 10 : 18);
-                playerGroup.position.x += Math.sin(angle) * speed * delta;
-                playerGroup.position.z += Math.cos(angle) * speed * delta;
-                playerGroup.rotation.y = angle;
-
-                if (currentBoat) {
-                    currentBoat.position.copy(playerGroup.position);
-                    currentBoat.position.y = 0;
-                    currentBoat.rotation.y = angle;
-                    currentBoat.rotation.z = Math.sin(time * 2) * 0.05;
-                    currentBoat.rotation.x = Math.sin(time * 1.5) * 0.05;
-                } else {
-                    playerBody.position.y = 0.6 + Math.sin(time * 10) * 0.1;
-                    playerHead.position.y = 1.5 + Math.sin(time * 10) * 0.1;
-                }
-            }
-
-            const camDist = 15;
-            const targetX = playerGroup.position.x + Math.sin(camAngle) * camDist;
-            const targetZ = playerGroup.position.z + Math.cos(camAngle) * camDist;
-            camera.position.x += (targetX - camera.position.x) * 0.1;
-            camera.position.z += (targetZ - camera.position.z) * 0.1;
-            camera.position.y = 8;
-            camera.lookAt(playerGroup.position);
-            
-            // --- SYNC P2P DATA (Setiap 0.1 detik) ---
-            syncTimer += delta;
-            if (syncTimer > 0.05 && sendMove) {
-                sendMove({
-                    x: playerGroup.position.x,
-                    z: playerGroup.position.z,
-                    rot: playerGroup.rotation.y,
-                    boat: STATE.boatLevel,
-                    name: playerName + ' #' + playerHash
-                });
-                syncTimer = 0;
-            }
-        }
-        
-        // Update Remote Players
-        for (let id in peers) {
-            const p = peers[id];
-            // Interpolasi posisi (smoothing)
-            p.mesh.position.lerp(p.targetPos, 0.1);
-            
-            // Rotasi (sederhana)
-            p.mesh.rotation.y = p.targetRot;
-            
-            // Animasi perahu remote
-            if (p.boatGroup.children.length > 0) {
-                p.boatGroup.rotation.y = p.targetRot;
-                p.boatGroup.rotation.z = Math.sin(time * 2) * 0.05;
-                p.boatGroup.position.copy(p.mesh.position);
-                p.boatGroup.position.y = 0;
+            if (currentBoat) {
+                currentBoat.position.copy(playerGroup.position);
+                currentBoat.position.y = 0;
+                currentBoat.rotation.y = angle;
+                currentBoat.rotation.z = Math.sin(time * 2) * 0.05;
+                currentBoat.rotation.x = Math.sin(time * 1.5) * 0.05;
             } else {
-                // Jika tidak ada perahu, gerakkan orangnya
-                p.mesh.children[0].position.y = 0.6 + Math.sin(time * 10) * 0.1;
+                playerBody.position.y = 0.6 + Math.sin(time * 10) * 0.1;
+                playerHead.position.y = 1.5 + Math.sin(time * 10) * 0.1;
             }
         }
 
-        if (fishingLine.visible) {
-            const rodTip = new THREE.Vector3(0, 2.5, 1.5);
-            rodTip.applyMatrix4(playerGroup.matrixWorld);
-            const positions = fishingLine.geometry.attributes.position.array;
-            positions[0] = rodTip.x; positions[1] = rodTip.y; positions[2] = rodTip.z;
-            positions[3] = bobber.position.x; positions[4] = bobber.position.y; positions[5] = bobber.position.z;
-            fishingLine.geometry.attributes.position.needsUpdate = true;
-            if(STATE.fishingPhase === 'biting') bobber.position.y = -0.5 + Math.sin(time * 20) * 0.2;
-            else bobber.position.y = 0 + Math.sin(time * 3) * 0.1;
-        }
-
-        fishes.forEach(f => {
-            f.translateZ(f.userData.speed);
-            f.rotateY(f.userData.turnSpeed);
-            if(f.position.length() > 140) f.rotateY(Math.PI);
-        });
-
-        for(let i=particles.length-1; i>=0; i--) {
-            const p = particles[i];
-            p.position.add(p.userData.vel);
-            p.userData.vel.y -= 0.02;
-            p.userData.life -= 0.05;
-            p.scale.setScalar(p.userData.life);
-            if(p.userData.life <= 0) { scene.remove(p); particles.splice(i, 1); }
-        }
-
-        updateLabelsPosition();
-        renderer.render(scene, camera);
+        // Camera Follow Player
+        const camDist = 15;
+        const targetX = playerGroup.position.x + Math.sin(camAngle) * camDist;
+        const targetZ = playerGroup.position.z + Math.cos(camAngle) * camDist;
+        camera.position.x += (targetX - camera.position.x) * 0.1;
+        camera.position.z += (targetZ - camera.position.z) * 0.1;
+        camera.position.y = 8;
+        camera.lookAt(playerGroup.position);
     }
 
-    playerGroup.position.set(0, 0, 0);
-    animate();
+    // Fishing Line
+    if (fishingLine.visible) {
+        const rodTip = new THREE.Vector3(0, 2.5, 1.5);
+        rodTip.applyMatrix4(playerGroup.matrixWorld);
+        const positions = fishingLine.geometry.attributes.position.array;
+        positions[0] = rodTip.x; positions[1] = rodTip.y; positions[2] = rodTip.z;
+        positions[3] = bobber.position.x; positions[4] = bobber.position.y; positions[5] = bobber.position.z;
+        fishingLine.geometry.attributes.position.needsUpdate = true;
+        if(STATE.fishingPhase === 'biting') bobber.position.y = -0.5 + Math.sin(time * 20) * 0.2;
+        else bobber.position.y = 0 + Math.sin(time * 3) * 0.1;
+    }
 
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
+    // Fishes
+    fishes.forEach(f => {
+        f.translateZ(f.userData.speed);
+        f.rotateY(f.userData.turnSpeed);
+        if(f.position.length() > 140) f.rotateY(Math.PI);
     });
+
+    // Particles
+    for(let i=particles.length-1; i>=0; i--) {
+        const p = particles[i];
+        p.position.add(p.userData.vel);
+        p.userData.vel.y -= 0.02;
+        p.userData.life -= 0.05;
+        p.scale.setScalar(p.userData.life);
+        if(p.userData.life <= 0) { scene.remove(p); particles.splice(i, 1); }
+    }
+
+    updateNameTagPosition();
+    renderer.render(scene, camera);
+}
+
+// Init position
+playerGroup.position.set(0, 0, 0);
+animate();
+
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
 </script>
 </body>
 </html>

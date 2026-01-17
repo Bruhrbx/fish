@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>🎣 Fishing</title>
+<title>🎣 Fishing Adventure 2.1 - New Island</title>
 <style>
     body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; -webkit-user-select: none; }
     
@@ -11,7 +11,6 @@
     #main-menu {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         display: flex; flex-direction: column; justify-content: center; align-items: center;
-        /* Kunci efek blur background */
         background: rgba(0, 0, 0, 0.4); 
         backdrop-filter: blur(10px); 
         -webkit-backdrop-filter: blur(10px);
@@ -20,7 +19,7 @@
     }
     
     .menu-card {
-        background: rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.95);
         padding: 40px;
         border-radius: 20px;
         text-align: center;
@@ -36,39 +35,40 @@
         100% { transform: translateY(0px); }
     }
 
-    .menu-card h1 { margin: 0 0 20px 0; color: #1976D2; font-size: 24px; }
+    .menu-card h1 { margin: 0 0 5px 0; color: #1976D2; font-size: 28px; }
+    .subtitle { font-size: 12px; color: #666; margin-bottom: 20px; }
     
-    .input-name {
-        width: 80%; padding: 12px; margin-bottom: 20px;
+    .input-group { margin-bottom: 15px; text-align: left; }
+    .input-group label { font-size: 12px; font-weight: bold; color: #555; display: block; margin-bottom: 5px; }
+    
+    .input-field {
+        width: 90%; padding: 12px; 
         border: 2px solid #ddd; border-radius: 10px;
-        font-size: 16px; text-align: center; outline: none;
+        font-size: 16px; outline: none; transition: border 0.3s;
     }
-    .input-name:focus { border-color: #2196F3; }
+    .input-field:focus { border-color: #2196F3; }
+
+    .remember-box {
+        display: flex; align-items: center; justify-content: center;
+        margin-bottom: 20px; font-size: 14px; color: #333;
+    }
+    .remember-box input { margin-right: 8px; transform: scale(1.2); cursor: pointer; }
 
     .btn-start {
         background: linear-gradient(135deg, #4CAF50, #2E7D32);
-        color: white; border: none; padding: 12px 40px;
+        color: white; border: none; padding: 12px 60px;
         border-radius: 30px; font-size: 18px; font-weight: bold;
         cursor: pointer; box-shadow: 0 4px 10px rgba(76, 175, 80, 0.4);
-        transition: transform 0.2s;
+        transition: transform 0.2s; width: 100%;
     }
     .btn-start:active { transform: scale(0.95); }
 
     /* --- NAME TAG --- */
     #player-nametag {
-        position: absolute;
-        background: rgba(0, 0, 0, 0.5);
-        color: white;
-        padding: 4px 10px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: bold;
-        pointer-events: none; /* Agar tidak menghalangi klik */
-        white-space: nowrap;
-        transform: translate(-50%, -100%); /* Center di atas kepala */
-        display: none; /* Sembunyi sebelum start */
-        z-index: 50;
-        text-shadow: 1px 1px 2px black;
+        position: absolute; background: rgba(0, 0, 0, 0.6); color: white;
+        padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold;
+        pointer-events: none; white-space: nowrap; transform: translate(-50%, -100%);
+        display: none; z-index: 50; border: 1px solid rgba(255,255,255,0.3);
     }
 
     /* UI Container */
@@ -109,6 +109,13 @@
     #joystick-bg { width: 100%; height: 100%; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; position: relative; }
     #joystick-stick { width: 50px; height: 50px; background: rgba(255,255,255,0.8); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 10px rgba(0,0,0,0.5); }
 
+    /* --- PC OPTIMIZATION: HIDE JOYSTICK ON LARGE SCREENS --- */
+    @media (min-width: 1024px) {
+        #joystick-zone {
+            display: none !important;
+        }
+    }
+
     /* Shop Modal */
     .modal-overlay {
         display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -147,11 +154,23 @@
 
 <div id="main-menu">
     <div class="menu-card">
-        <h1>🎣 Fishing</h1>
-        <p style="color:#666; margin-bottom:15px;">Masukkan nama untuk mulai memancing!</p>
-        <input type="text" id="username-input" class="input-name" placeholder="Nama Pemain" maxlength="12">
-        <br>
-        <button class="btn-start" onclick="startGame()">MULAI</button>
+        <h1>🎣 Fishing Life</h1>
+        <div class="subtitle">Login untuk melanjutkan petualangan</div>
+        
+        <div class="input-group">
+            <input type="text" id="username-input" class="input-field" placeholder="Username" maxlength="12">
+        </div>
+        
+        <div class="input-group">
+            <input type="password" id="password-input" class="input-field" placeholder="Password">
+        </div>
+
+        <div class="remember-box">
+            <input type="checkbox" id="remember-me">
+            <label for="remember-me">Remember Me</label>
+        </div>
+
+        <button class="btn-start" onclick="startGame()">LOGIN & MAIN</button>
     </div>
 </div>
 
@@ -162,7 +181,7 @@
         <div class="stat-box">
             <div class="stat-row"><i class="fas fa-coins" style="color:#ffd700"></i> <span id="money">0</span></div>
             <div class="stat-row"><i class="fas fa-fish" style="color:#4fc3f7"></i> <span id="fish-count">0</span></div>
-            <div class="badge">Level <span id="level-disp">1</span></div>
+            <div class="badge">Joran Lvl <span id="level-disp">1</span></div>
         </div>
         <div class="stat-box" style="align-items: flex-end;">
             <div class="stat-row"><i class="fas fa-ship"></i> <span id="boat-name">Jalan Kaki</span></div>
@@ -196,19 +215,19 @@
 <div id="shop-modal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>🏪 Toko Perlengkapan</h3>
+            <h3>🏪 Toko & Upgrade</h3>
             <button class="close-modal" onclick="closeShop()">✕</button>
         </div>
         <div class="modal-body">
             <div class="shop-item">
                 <div>
                     <strong>Jual Semua Ikan</strong><br>
-                    <small>Ubah hasil tangkapan jadi uang</small>
+                    <small>Ubah hasil tangkapan di ember jadi uang</small>
                 </div>
                 <button class="shop-btn" onclick="sellAllFish()">JUAL</button>
             </div>
             <hr>
-            <h4>🚤 Perahu</h4>
+            <h4>🚤 Perahu (Spawn di Laut)</h4>
             <div class="shop-item">
                 <div>
                     <strong>Perahu Kayu</strong><br>
@@ -239,17 +258,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <script>
-// --- GAME STATE & VARIABLES ---
-let gameStarted = false; // Flag to check if game is active
+// --- CONFIG & STATE ---
+let gameStarted = false;
 let playerName = "Player";
 
 const CONFIG = {
     colors: {
         water: 0x006994,
         skyDay: 0x87CEEB,
-        skySunset: 0xEDC9AF,
-        skyNight: 0x0f172a,
-        platform: 0x8BC34A
+        platform: 0x8BC34A,
+        sand: 0xE6C288 // Warna pasir untuk pulau baru
     }
 };
 
@@ -260,36 +278,82 @@ const STATE = {
     boatLevel: 0,
     isFishing: false,
     fishingPhase: 'idle', 
-    biteTimer: null,
-    dayTime: 0 
+    biteTimer: null
 };
+
+// --- SAVE / LOAD SYSTEM ---
+window.onload = function() {
+    // Cek apakah ada data tersimpan
+    const savedData = localStorage.getItem('fishingGameSave');
+    if (savedData) {
+        const data = JSON.parse(savedData);
+        document.getElementById('username-input').value = data.username;
+        document.getElementById('password-input').value = data.password;
+        document.getElementById('remember-me').checked = true;
+        STATE.tempMoney = data.money;
+        STATE.tempBoatLevel = data.boatLevel;
+        STATE.tempRodLevel = data.rodLevel;
+    }
+};
+
+function saveData() {
+    if (!document.getElementById('remember-me').checked) return;
+    const data = {
+        username: playerName,
+        password: document.getElementById('password-input').value,
+        money: STATE.money,
+        boatLevel: STATE.boatLevel,
+        rodLevel: STATE.rodLevel
+    };
+    localStorage.setItem('fishingGameSave', JSON.stringify(data));
+}
 
 // --- START GAME LOGIC ---
 function startGame() {
-    const input = document.getElementById('username-input');
-    if (input.value.trim() === "") {
-        alert("Mohon masukkan nama!");
+    const userInput = document.getElementById('username-input');
+    const passInput = document.getElementById('password-input');
+    
+    if (userInput.value.trim() === "" || passInput.value.trim() === "") {
+        alert("Mohon isi Username dan Password!");
         return;
     }
     
-    playerName = input.value;
+    playerName = userInput.value;
     gameStarted = true;
     
-    // Update Name Tag
-    const tag = document.getElementById('player-nametag');
-    tag.textContent = playerName;
-    tag.style.display = 'block';
+    if (STATE.tempMoney !== undefined) {
+        STATE.money = STATE.tempMoney;
+        STATE.boatLevel = STATE.tempBoatLevel;
+        STATE.rodLevel = STATE.tempRodLevel;
+    }
+    
+    updateHUD();
+    
+    if(STATE.boatLevel >= 1) document.getElementById('btn-boat-1').disabled = true;
+    if(STATE.boatLevel >= 2) document.getElementById('btn-boat-2').disabled = true;
+    document.getElementById('rod-cost').textContent = STATE.rodLevel * 50;
 
-    // Hide Menu with fade out
+    // --- SPAWN LOGIC ---
+    if (STATE.boatLevel > 0) {
+        playerGroup.position.set(25, 0, 25); 
+        updateBoatModel(STATE.boatLevel);
+        document.getElementById('boat-name').textContent = STATE.boatLevel === 1 ? "Perahu Kayu" : "Speedboat";
+        showNotification("Selamat datang kembali, Kapten!");
+    } else {
+        playerGroup.position.set(0, 0, 0); 
+    }
+
+    document.getElementById('player-nametag').textContent = playerName;
+    document.getElementById('player-nametag').style.display = 'block';
+
     const menu = document.getElementById('main-menu');
     menu.style.opacity = '0';
     setTimeout(() => {
         menu.style.display = 'none';
-        document.getElementById('ui-layer').style.display = 'flex'; // Show Game UI
+        document.getElementById('ui-layer').style.display = 'flex';
     }, 500);
 
-    // Reset Camera Angle for gameplay
-    camAngle = 0;
+    saveData();
 }
 
 // --- THREE.JS SETUP ---
@@ -298,89 +362,94 @@ scene.background = new THREE.Color(CONFIG.colors.skyDay);
 scene.fog = new THREE.FogExp2(CONFIG.colors.skyDay, 0.015);
 
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-// Start with a cinematic angle for the menu background
 camera.position.set(20, 15, 20);
-camera.lookAt(0, 0, 0);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
-// --- LIGHTING ---
 const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
 scene.add(hemiLight);
-
 const dirLight = new THREE.DirectionalLight(0xffffff, 1);
 dirLight.position.set(50, 100, 50);
 dirLight.castShadow = true;
-dirLight.shadow.mapSize.width = 2048;
+dirLight.shadow.mapSize.width = 2048; 
 dirLight.shadow.mapSize.height = 2048;
 scene.add(dirLight);
 
-// --- ENVIRONMENT ---
-const waterGeometry = new THREE.PlaneGeometry(300, 300, 64, 64);
-const waterMaterial = new THREE.MeshPhongMaterial({
-    color: CONFIG.colors.water,
-    transparent: true,
-    opacity: 0.85,
-    shininess: 80,
-    flatShading: true 
-});
+const waterGeometry = new THREE.PlaneGeometry(800, 800, 64, 64);
+const waterMaterial = new THREE.MeshPhongMaterial({ color: CONFIG.colors.water, transparent: true, opacity: 0.85, shininess: 80, flatShading: true });
 const water = new THREE.Mesh(waterGeometry, waterMaterial);
 water.rotation.x = -Math.PI / 2;
 water.position.y = -0.5;
 scene.add(water);
 
-const waterPosAttribute = waterGeometry.attributes.position;
-const waterOriginalPos = [];
-for(let i = 0; i < waterPosAttribute.count; i++){
-    waterOriginalPos.push({
-        x: waterPosAttribute.getX(i),
-        y: waterPosAttribute.getY(i),
-        z: waterPosAttribute.getZ(i)
-    });
-}
-
-// Island
-const islandGroup = new THREE.Group();
-const platformMesh = new THREE.Mesh(
-    new THREE.CylinderGeometry(18, 22, 4, 8),
-    new THREE.MeshStandardMaterial({ color: 0x5D4037 }) 
-);
-platformMesh.position.y = -2;
-platformMesh.receiveShadow = true;
-islandGroup.add(platformMesh);
-
-const grassMesh = new THREE.Mesh(
-    new THREE.CylinderGeometry(18, 18, 0.5, 8),
-    new THREE.MeshStandardMaterial({ color: CONFIG.colors.platform })
-);
-grassMesh.position.y = 0;
-grassMesh.receiveShadow = true;
-islandGroup.add(grassMesh);
-
-function createTree(x, z) {
+// --- HELPER UNTUK POHON ---
+function createTree(x, z, parentGroup) {
     const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.7, 3, 5), new THREE.MeshStandardMaterial({color:0x4e342e}));
     trunk.position.set(x, 1.5, z);
     trunk.castShadow = true;
-    const leaves = new THREE.Mesh(new THREE.ConeGeometry(2.5, 5, 5), new THREE.MeshStandardMaterial({color:0x2e7d32}));
-    leaves.position.set(x, 4.5, z);
+    // Variasi daun sedikit
+    const scale = 1 + Math.random() * 0.5;
+    const leaves = new THREE.Mesh(new THREE.ConeGeometry(2.5 * scale, 5 * scale, 5), new THREE.MeshStandardMaterial({color:0x2e7d32}));
+    leaves.position.set(x, 4.5 + (scale-1), z);
     leaves.castShadow = true;
-    islandGroup.add(trunk, leaves);
+    parentGroup.add(trunk, leaves);
 }
-createTree(-8, -5);
-createTree(-10, 2);
-createTree(9, -6);
+
+// --- PULAU 1 (SPAWN) ---
+const islandGroup = new THREE.Group();
+const platformMesh = new THREE.Mesh(new THREE.CylinderGeometry(18, 22, 4, 8), new THREE.MeshStandardMaterial({ color: 0x5D4037 }));
+platformMesh.position.y = -2; platformMesh.receiveShadow = true;
+islandGroup.add(platformMesh);
+const grassMesh = new THREE.Mesh(new THREE.CylinderGeometry(18, 18, 0.5, 8), new THREE.MeshStandardMaterial({ color: CONFIG.colors.platform }));
+grassMesh.position.y = 0; grassMesh.receiveShadow = true;
+islandGroup.add(grassMesh);
+
+createTree(-8, -5, islandGroup); 
+createTree(-10, 2, islandGroup); 
+createTree(9, -6, islandGroup);
 scene.add(islandGroup);
 
+// --- PULAU 2 (BARU) ---
+const island2Group = new THREE.Group();
+island2Group.position.set(60, 0, -50); // Lokasi pulau baru
+
+const ground2 = new THREE.Mesh(new THREE.CylinderGeometry(15, 20, 5, 7), new THREE.MeshStandardMaterial({ color: 0x5D4037 }));
+ground2.position.y = -2; ground2.receiveShadow = true;
+island2Group.add(ground2);
+
+const sand2 = new THREE.Mesh(new THREE.CylinderGeometry(14, 16, 0.6, 7), new THREE.MeshStandardMaterial({ color: CONFIG.colors.sand }));
+sand2.position.y = 0; sand2.receiveShadow = true;
+island2Group.add(sand2);
+
+// Tambah banyak pohon di pulau baru
+createTree(0, 0, island2Group);
+createTree(5, 5, island2Group);
+createTree(-5, 4, island2Group);
+createTree(3, -6, island2Group);
+createTree(-6, -5, island2Group);
+
+scene.add(island2Group);
+
+
+// --- CEK TABRAKAN (COLLISION) ---
+// Diupdate agar support 2 pulau
 function checkCollision(x, z) {
-    const dist = Math.sqrt(x*x + z*z);
-    return dist < 17; 
+    // Jarak ke pulau 1
+    const dist1 = Math.sqrt(x*x + z*z);
+    
+    // Jarak ke pulau 2 (harus hitung offset posisi pulau)
+    const dx = x - 60;
+    const dz = z - (-50);
+    const dist2 = Math.sqrt(dx*dx + dz*dz);
+    
+    // True jika ada di pulau 1 ATAU pulau 2
+    return (dist1 < 17) || (dist2 < 14); 
 }
 
-// --- PLAYER & BOAT ---
+// --- PLAYER & BUCKET ---
 const playerGroup = new THREE.Group();
 scene.add(playerGroup);
 
@@ -392,6 +461,22 @@ playerHead.position.y = 1.5;
 playerHead.castShadow = true;
 playerGroup.add(playerBody, playerHead);
 
+const bucketGroup = new THREE.Group();
+const bucketGeo = new THREE.CylinderGeometry(0.25, 0.2, 0.35, 8);
+const bucketMat = new THREE.MeshStandardMaterial({color: 0x8D6E63}); 
+const bucketMesh = new THREE.Mesh(bucketGeo, bucketMat);
+bucketMesh.position.y = 0.17;
+const handleGeo = new THREE.TorusGeometry(0.25, 0.02, 4, 12, Math.PI);
+const handleMat = new THREE.MeshBasicMaterial({color: 0x333});
+const bucketHandle = new THREE.Mesh(handleGeo, handleMat);
+bucketHandle.rotation.z = Math.PI / 2;
+bucketHandle.position.y = 0.35;
+
+bucketGroup.add(bucketMesh, bucketHandle);
+bucketGroup.position.set(-0.6, 0.8, 0.1); 
+bucketGroup.rotation.z = -0.2; 
+playerGroup.add(bucketGroup);
+
 const rodGroup = new THREE.Group();
 const rodStick = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.08, 3, 4), new THREE.MeshStandardMaterial({color: 0x333}));
 rodStick.rotation.x = Math.PI / 4;
@@ -399,13 +484,10 @@ rodStick.position.set(0.3, 1.5, 0.5);
 rodGroup.add(rodStick);
 playerGroup.add(rodGroup);
 
-const bobber = new THREE.Mesh(new THREE.SphereGeometry(0.2), new THREE.MeshStandardMaterial({color: 0xFF3D00, emissive: 0xAA0000, emissiveIntensity: 0.2}));
+const bobber = new THREE.Mesh(new THREE.SphereGeometry(0.2), new THREE.MeshStandardMaterial({color: 0xFF3D00, emissive: 0xAA0000}));
 scene.add(bobber);
 bobber.visible = false;
-
-const lineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,0)]);
-const lineMat = new THREE.LineBasicMaterial({ color: 0xFFFFFF });
-const fishingLine = new THREE.Line(lineGeo, lineMat);
+const fishingLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,0)]), new THREE.LineBasicMaterial({ color: 0xFFFFFF }));
 scene.add(fishingLine);
 fishingLine.visible = false;
 
@@ -430,134 +512,91 @@ function updateBoatModel(level) {
     scene.add(currentBoat);
 }
 
-// --- FISH SYSTEM ---
+// Fish System
 const fishes = [];
 function spawnFish() {
     const fish = new THREE.Group();
-    const body = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), new THREE.MeshStandardMaterial({color: Math.random() > 0.8 ? 0xFFD700 : 0x00BCD4}));
+    const body = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), new THREE.MeshStandardMaterial({color: Math.random()>0.8?0xFFD700:0x00BCD4}));
     body.scale.set(1, 0.6, 1);
     const tail = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.4, 4), new THREE.MeshStandardMaterial({color: 0xffffff}));
-    tail.position.z = -0.4;
-    tail.rotation.x = -Math.PI/2;
+    tail.position.z = -0.4; tail.rotation.x = -Math.PI/2;
     fish.add(body, tail);
-    
-    const angle = Math.random() * Math.PI * 2;
-    const dist = 25 + Math.random() * 50;
+    const angle = Math.random()*Math.PI*2; const dist = 25+Math.random()*80; // Area ikan diperluas
     fish.position.set(Math.cos(angle)*dist, -0.5, Math.sin(angle)*dist);
-    fish.rotation.y = Math.random() * Math.PI * 2;
-    
-    fish.userData = { speed: 0.05 + Math.random() * 0.05, turnSpeed: (Math.random() - 0.5) * 0.02, isGold: body.material.color.getHex() === 0xFFD700 };
-    scene.add(fish);
-    fishes.push(fish);
+    fish.rotation.y = Math.random()*Math.PI*2;
+    fish.userData = {speed: 0.05+Math.random()*0.05, turnSpeed: (Math.random()-0.5)*0.02};
+    scene.add(fish); fishes.push(fish);
 }
-for(let i=0; i<20; i++) spawnFish();
+for(let i=0; i<30; i++) spawnFish(); // Ikan ditambah
 
 const particles = [];
 function createSplash(pos) {
     for(let i=0; i<8; i++) {
         const p = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), new THREE.MeshBasicMaterial({color: 0xEEFFFF}));
-        p.position.copy(pos);
-        p.position.y = 0;
-        p.userData = { vel: new THREE.Vector3((Math.random()-0.5)*0.2, 0.3 + Math.random()*0.2, (Math.random()-0.5)*0.2), life: 1.0 };
-        scene.add(p);
-        particles.push(p);
+        p.position.copy(pos); p.position.y=0;
+        p.userData = {vel: new THREE.Vector3((Math.random()-0.5)*0.2, 0.3, (Math.random()-0.5)*0.2), life: 1.0};
+        scene.add(p); particles.push(p);
     }
 }
 
-// --- CONTROLS ---
+// Controls
 const joystick = { active: false, x: 0, y: 0, originX: 0, originY: 0 };
 const keys = { w: false, a: false, s: false, d: false };
-
 const joyZone = document.getElementById('joystick-zone');
 const stick = document.getElementById('joystick-stick');
 
 joyZone.addEventListener('touchstart', (e) => {
-    if (!gameStarted) return;
-    e.preventDefault();
-    const touch = e.touches[0];
-    joystick.active = true;
-    joystick.originX = touch.clientX;
-    joystick.originY = touch.clientY;
+    if (!gameStarted) return; e.preventDefault();
+    const touch = e.touches[0]; joystick.active = true;
+    joystick.originX = touch.clientX; joystick.originY = touch.clientY;
     stick.style.transition = 'none';
 });
-
 document.addEventListener('touchmove', (e) => {
     if(!joystick.active || !gameStarted) return;
     const touch = e.touches[0];
-    const dx = touch.clientX - joystick.originX;
-    const dy = touch.clientY - joystick.originY;
+    const dx = touch.clientX - joystick.originX; const dy = touch.clientY - joystick.originY;
     const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 60);
     const angle = Math.atan2(dy, dx);
-    joystick.x = (Math.cos(angle) * dist) / 60;
-    joystick.y = (Math.sin(angle) * dist) / 60;
+    joystick.x = (Math.cos(angle)*dist)/60; joystick.y = (Math.sin(angle)*dist)/60;
     stick.style.transform = `translate(calc(-50% + ${Math.cos(angle)*dist}px), calc(-50% + ${Math.sin(angle)*dist}px))`;
 }, {passive: false});
-
-const endJoy = () => {
-    joystick.active = false;
-    joystick.x = 0;
-    joystick.y = 0;
-    stick.style.transition = 'transform 0.1s';
-    stick.style.transform = `translate(-50%, -50%)`;
-};
-document.addEventListener('touchend', endJoy);
-
-document.addEventListener('keydown', e => {
-    if (!gameStarted) return;
-    if(e.key === ' ') handleCast();
-    if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = true;
+document.addEventListener('touchend', () => {
+    joystick.active = false; joystick.x = 0; joystick.y = 0;
+    stick.style.transition = 'transform 0.1s'; stick.style.transform = `translate(-50%, -50%)`;
 });
-document.addEventListener('keyup', e => {
-    if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = false;
-});
+document.addEventListener('keydown', e => { if(gameStarted) { if(e.key===' ') handleCast(); if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = true; }});
+document.addEventListener('keyup', e => { if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = false; });
 
-// Camera
-let camAngle = 0;
-let isDragging = false;
-let lastMouseX = 0;
-
+let camAngle = 0; let isDragging = false; let lastMouseX = 0;
 document.addEventListener('mousedown', e => { if(e.button===2 && gameStarted) { isDragging=true; lastMouseX=e.clientX; } });
-document.addEventListener('mousemove', e => {
-    if(isDragging && gameStarted) {
-        camAngle -= (e.clientX - lastMouseX) * 0.005;
-        lastMouseX = e.clientX;
-    }
-});
+document.addEventListener('mousemove', e => { if(isDragging && gameStarted) { camAngle -= (e.clientX - lastMouseX) * 0.005; lastMouseX = e.clientX; } });
 document.addEventListener('mouseup', () => isDragging=false);
 document.addEventListener('contextmenu', e => e.preventDefault());
 
-// --- GAME LOGIC FUNCTIONS ---
+// Game Logic
 function showNotification(msg) {
     const el = document.getElementById('notification');
-    el.textContent = msg;
-    el.style.opacity = 1;
+    el.textContent = msg; el.style.opacity = 1;
     setTimeout(() => el.style.opacity = 0, 2000);
 }
 
 function handleCast() {
     if (STATE.fishingPhase === 'idle') {
+        // Cek collision di update agar pemain bisa mancing dari pulau 1 atau pulau 2
         if (STATE.boatLevel === 0 && !checkCollision(playerGroup.position.x, playerGroup.position.z)) {
-            showNotification("Tidak bisa mancing sambil berenang!");
-            return;
+            showNotification("Tidak bisa mancing sambil berenang!"); return;
         }
-        STATE.isFishing = true;
-        STATE.fishingPhase = 'casted';
+        STATE.isFishing = true; STATE.fishingPhase = 'casted';
         document.getElementById('cast-btn').innerHTML = '<i class="fas fa-exclamation"></i> TUNGGU..';
         document.getElementById('cast-btn').className = 'action-btn btn-orange';
         
         const dir = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), playerGroup.rotation.y);
         const castDist = 8 + STATE.rodLevel * 2;
         bobber.position.set(playerGroup.position.x + dir.x * castDist, 0, playerGroup.position.z + dir.z * castDist);
-        bobber.visible = true;
-        fishingLine.visible = true;
-        createSplash(bobber.position);
-
-        const waitTime = (Math.random() * 3000) + 2000;
-        setTimeout(triggerBite, waitTime);
-
+        bobber.visible = true; fishingLine.visible = true; createSplash(bobber.position);
+        setTimeout(triggerBite, (Math.random()*3000)+2000);
     } else if (STATE.fishingPhase === 'biting') {
-        clearTimeout(STATE.biteTimer);
-        catchFish();
+        clearTimeout(STATE.biteTimer); catchFish();
     } else if (STATE.fishingPhase === 'casted') {
         resetFishing("Terlalu cepat!");
     }
@@ -568,31 +607,32 @@ function triggerBite() {
     STATE.fishingPhase = 'biting';
     document.getElementById('cast-btn').innerHTML = '<i class="fas fa-bolt"></i> TARIK!';
     document.getElementById('cast-btn').className = 'action-btn btn-red';
-    bobber.position.y = -0.5;
-    createSplash(bobber.position);
+    bobber.position.y = -0.5; createSplash(bobber.position);
     STATE.biteTimer = setTimeout(() => { resetFishing("Ikan lepas!"); }, 1000);
 }
 
 function catchFish() {
     const isRare = Math.random() < 0.2;
     const value = isRare ? 50 : 10;
-    const name = isRare ? "Ikan Emas Legenda" : "Ikan Biasa";
+    const name = isRare ? "Ikan Emas" : "Ikan Biasa";
     STATE.fishInventory.push({name, value});
+    
     const alert = document.getElementById('catch-alert');
     document.getElementById('catch-name').textContent = name;
     document.getElementById('catch-value').textContent = value;
     alert.style.transform = 'translate(-50%, -50%) scale(1)';
     setTimeout(() => alert.style.transform = 'translate(-50%, -50%) scale(0)', 1500);
-    resetFishing(null);
-    updateHUD();
+    
+    bucketGroup.scale.set(1.2, 1.2, 1.2);
+    setTimeout(() => bucketGroup.scale.set(1, 1, 1), 200);
+
+    resetFishing(null); updateHUD(); saveData();
 }
 
 function resetFishing(msg) {
     if(msg) showNotification(msg);
-    STATE.isFishing = false;
-    STATE.fishingPhase = 'idle';
-    bobber.visible = false;
-    fishingLine.visible = false;
+    STATE.isFishing = false; STATE.fishingPhase = 'idle';
+    bobber.visible = false; fishingLine.visible = false;
     document.getElementById('cast-btn').innerHTML = '<i class="fas fa-anchor"></i> LEMPAR';
     document.getElementById('cast-btn').className = 'action-btn btn-green';
 }
@@ -605,168 +645,105 @@ function updateHUD() {
 
 function openShop() { document.getElementById('shop-modal').style.display = 'flex'; }
 function closeShop() { document.getElementById('shop-modal').style.display = 'none'; }
+
 function sellAllFish() {
     if (STATE.fishInventory.length === 0) return;
-    let total = 0;
-    STATE.fishInventory.forEach(f => total += f.value);
-    STATE.money += total;
-    STATE.fishInventory = [];
-    updateHUD();
-    showNotification(`Terjual! +${total} Coin`);
+    let total = 0; STATE.fishInventory.forEach(f => total += f.value);
+    STATE.money += total; STATE.fishInventory = [];
+    updateHUD(); saveData(); showNotification(`Terjual! +${total} Coin`);
 }
+
 function buyBoat(level, cost) {
     if (STATE.money >= cost && STATE.boatLevel < level) {
-        STATE.money -= cost;
-        STATE.boatLevel = level;
+        STATE.money -= cost; STATE.boatLevel = level;
         updateBoatModel(level);
         document.getElementById('boat-name').textContent = level === 1 ? "Perahu Kayu" : "Speedboat";
         document.getElementById(`btn-boat-${level}`).disabled = true;
-        updateHUD();
+        
+        playerGroup.position.set(25, 0, 25);
+        showNotification("Kapal dibeli! Spawn di laut.");
+        
+        updateHUD(); saveData();
     }
 }
+
 function upgradeRod() {
     const cost = STATE.rodLevel * 50;
     if (STATE.money >= cost) {
-        STATE.money -= cost;
-        STATE.rodLevel++;
+        STATE.money -= cost; STATE.rodLevel++;
         document.getElementById('rod-cost').textContent = STATE.rodLevel * 50;
-        updateHUD();
+        updateHUD(); saveData();
     }
 }
 
-// Function to update name tag position
 function updateNameTagPosition() {
     if(!gameStarted) return;
-    
     const tag = document.getElementById('player-nametag');
-    
-    // Copy position and raise it above head
     const pos = playerGroup.position.clone();
     pos.y += 2.8; 
-
-    // Convert 3D position to 2D screen coords
     pos.project(camera);
-
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const x = (pos.x * .5 + .5) * width;
-    const y = (-(pos.y * .5) + .5) * height;
-
-    // Check if behind camera
-    if (pos.z < 1) {
-        tag.style.left = x + 'px';
-        tag.style.top = y + 'px';
-        tag.style.display = 'block';
-    } else {
-        tag.style.display = 'none';
-    }
+    const width = window.innerWidth; const height = window.innerHeight;
+    const x = (pos.x * .5 + .5) * width; const y = (-(pos.y * .5) + .5) * height;
+    if (pos.z < 1) { tag.style.left = x + 'px'; tag.style.top = y + 'px'; }
 }
 
-// --- LOOP ---
 const clock = new THREE.Clock();
-
 function animate() {
     requestAnimationFrame(animate);
-    const delta = clock.getDelta();
-    const time = clock.getElapsedTime();
-
-    // Water Anim
-    for(let i = 0; i < waterPosAttribute.count; i++){
-        const orig = waterOriginalPos[i];
-        const z = 0.5 * Math.sin(orig.x * 0.2 + time) * Math.cos(orig.y * 0.1 + time);
-        waterPosAttribute.setZ(i, orig.z + z);
-    }
-    waterPosAttribute.needsUpdate = true;
-
+    const delta = clock.getDelta(); const time = clock.getElapsedTime();
+    
     if (!gameStarted) {
-        // Main Menu Background Animation (Auto Rotate Camera)
-        camera.position.x = Math.sin(time * 0.1) * 30;
-        camera.position.z = Math.cos(time * 0.1) * 30;
-        camera.lookAt(0,0,0);
-    }
-
-    // Player Movement only if Game Started
-    if (gameStarted && !STATE.isFishing) {
+        camera.position.x = Math.sin(time*0.1)*30; camera.position.z = Math.cos(time*0.1)*30; camera.lookAt(0,0,0);
+    } else if (!STATE.isFishing) {
         let mx = 0, mz = 0;
         if (joystick.active) { mx = joystick.x; mz = joystick.y; } 
-        else {
-            if(keys.w) mz = -1;
-            if(keys.s) mz = 1;
-            if(keys.a) mx = -1;
-            if(keys.d) mx = 1;
-        }
-
+        else { if(keys.w) mz = -1; if(keys.s) mz = 1; if(keys.a) mx = -1; if(keys.d) mx = 1; }
+        
         if (mx !== 0 || mz !== 0) {
             const angle = Math.atan2(mx, mz) + camAngle;
             const speed = (STATE.boatLevel === 0) ? 5 : (STATE.boatLevel === 1 ? 10 : 18);
             playerGroup.position.x += Math.sin(angle) * speed * delta;
             playerGroup.position.z += Math.cos(angle) * speed * delta;
             playerGroup.rotation.y = angle;
-
+            
             if (currentBoat) {
-                currentBoat.position.copy(playerGroup.position);
-                currentBoat.position.y = 0;
+                currentBoat.position.copy(playerGroup.position); currentBoat.position.y = 0;
                 currentBoat.rotation.y = angle;
-                currentBoat.rotation.z = Math.sin(time * 2) * 0.05;
-                currentBoat.rotation.x = Math.sin(time * 1.5) * 0.05;
+                currentBoat.rotation.z = Math.sin(time*2)*0.05; currentBoat.rotation.x = Math.sin(time*1.5)*0.05;
             } else {
-                playerBody.position.y = 0.6 + Math.sin(time * 10) * 0.1;
-                playerHead.position.y = 1.5 + Math.sin(time * 10) * 0.1;
+                playerBody.position.y = 0.6 + Math.sin(time*10)*0.1;
+                playerHead.position.y = 1.5 + Math.sin(time*10)*0.1;
             }
         }
-
-        // Camera Follow Player
+        
         const camDist = 15;
-        const targetX = playerGroup.position.x + Math.sin(camAngle) * camDist;
-        const targetZ = playerGroup.position.z + Math.cos(camAngle) * camDist;
-        camera.position.x += (targetX - camera.position.x) * 0.1;
-        camera.position.z += (targetZ - camera.position.z) * 0.1;
-        camera.position.y = 8;
-        camera.lookAt(playerGroup.position);
+        camera.position.x += (playerGroup.position.x + Math.sin(camAngle)*camDist - camera.position.x) * 0.1;
+        camera.position.z += (playerGroup.position.z + Math.cos(camAngle)*camDist - camera.position.z) * 0.1;
+        camera.position.y = 8; camera.lookAt(playerGroup.position);
     }
 
-    // Fishing Line
     if (fishingLine.visible) {
-        const rodTip = new THREE.Vector3(0, 2.5, 1.5);
-        rodTip.applyMatrix4(playerGroup.matrixWorld);
+        const rodTip = new THREE.Vector3(0, 2.5, 1.5); rodTip.applyMatrix4(playerGroup.matrixWorld);
         const positions = fishingLine.geometry.attributes.position.array;
         positions[0] = rodTip.x; positions[1] = rodTip.y; positions[2] = rodTip.z;
         positions[3] = bobber.position.x; positions[4] = bobber.position.y; positions[5] = bobber.position.z;
         fishingLine.geometry.attributes.position.needsUpdate = true;
-        if(STATE.fishingPhase === 'biting') bobber.position.y = -0.5 + Math.sin(time * 20) * 0.2;
-        else bobber.position.y = 0 + Math.sin(time * 3) * 0.1;
+        bobber.position.y = (STATE.fishingPhase==='biting') ? -0.5+Math.sin(time*20)*0.2 : 0+Math.sin(time*3)*0.1;
     }
 
-    // Fishes
-    fishes.forEach(f => {
-        f.translateZ(f.userData.speed);
-        f.rotateY(f.userData.turnSpeed);
-        if(f.position.length() > 140) f.rotateY(Math.PI);
-    });
-
-    // Particles
+    fishes.forEach(f => { f.translateZ(f.userData.speed); f.rotateY(f.userData.turnSpeed); if(f.position.length()>200) f.rotateY(Math.PI); });
     for(let i=particles.length-1; i>=0; i--) {
-        const p = particles[i];
-        p.position.add(p.userData.vel);
-        p.userData.vel.y -= 0.02;
-        p.userData.life -= 0.05;
-        p.scale.setScalar(p.userData.life);
-        if(p.userData.life <= 0) { scene.remove(p); particles.splice(i, 1); }
+        const p = particles[i]; p.position.add(p.userData.vel);
+        p.userData.vel.y -= 0.02; p.userData.life -= 0.05; p.scale.setScalar(p.userData.life);
+        if(p.userData.life<=0) { scene.remove(p); particles.splice(i,1); }
     }
-
+    
     updateNameTagPosition();
     renderer.render(scene, camera);
 }
-
-// Init position
-playerGroup.position.set(0, 0, 0);
 animate();
 
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
+window.addEventListener('resize', () => { camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
 </script>
 </body>
 </html>
